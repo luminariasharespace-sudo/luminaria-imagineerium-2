@@ -71,23 +71,37 @@ const FadeIn = ({ children, delay = 0, direction = 'up', distance = 20, duration
 // --- Components ---
 
 const TopBanner = () => {
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 0);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
     <div 
-      className="w-full py-[10px] px-4 text-center relative z-[110] border-b border-[#E7DFD0]"
+      id="top-banner"
+      className="w-full py-[8px] sm:py-[10px] px-3 sm:px-4 text-center sticky top-0 z-[1100] border-b border-[#E7DFD0] transition-shadow duration-200"
       style={{
         backgroundColor: '#FBF8F1',
-        color: '#2A1830'
+        color: '#2A1830',
+        boxShadow: isScrolled ? '0 1px 6px rgba(42, 24, 48, 0.08)' : 'none'
       }}
     >
       <div 
-        className="max-w-7xl mx-auto flex items-center justify-center text-center flex-wrap leading-normal"
+        className="max-w-7xl mx-auto flex items-center justify-center text-center flex-wrap leading-[1.35] sm:leading-normal"
         style={{
           fontFamily: '"Plus Jakarta Sans", sans-serif',
           fontStyle: 'normal',
           color: '#2A1830'
         }}
       >
-        <span className="text-[13.5px] sm:text-[14px]">
+        <span className="text-[13px] sm:text-[14px]">
           <span style={{ fontWeight: 600, color: '#2A1830' }}>
             Dec 7–11 · Help us unlock $1,000 →{' '}
           </span>
@@ -119,17 +133,15 @@ const TopBanner = () => {
 
 const Navbar = () => {
   const [activeSection, setActiveSection] = useState('hero');
-  const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [hoveredNav, setHoveredNav] = useState<string | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 40);
-      
       const sections = ['hero', 'vision', 'donate', 'contact'];
-      // Offset for sticky header
-      const scrollPosition = window.scrollY + 120;
+      const banner = document.getElementById('top-banner');
+      const bannerHeight = banner ? banner.getBoundingClientRect().height : 42;
+      const scrollPosition = window.scrollY + bannerHeight + 40;
 
       for (const section of sections) {
         const element = document.getElementById(section);
@@ -142,7 +154,7 @@ const Navbar = () => {
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll(); // Initial check
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -157,9 +169,10 @@ const Navbar = () => {
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
-      const offset = 80; 
+      const banner = document.getElementById('top-banner');
+      const offset = banner ? banner.getBoundingClientRect().height : 42;
       const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - offset;
+      const offsetPosition = Math.max(0, elementPosition + window.pageYOffset - offset);
 
       window.scrollTo({
         top: offsetPosition,
@@ -187,9 +200,7 @@ const Navbar = () => {
 
   return (
     <nav 
-      className={`sticky top-0 z-[1000] transition-all duration-300 border-b border-[#4A3552]/40 bg-[#2A1830] ${
-        isScrolled ? 'py-1 shadow-xl' : 'py-1.5 md:py-2'
-      }`}
+      className="relative z-[1000] py-1.5 md:py-2 border-b border-[#4A3552]/40 bg-[#2A1830]"
       style={{ backgroundColor: '#2A1830' }}
     >
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
@@ -572,18 +583,14 @@ const Hero = () => {
             </p>
           </div>
 
-          {/* 4. Two buttons, side by side on tablet/desktop, stacked equal-width centered on mobile */}
-          <div className="grid grid-cols-1 w-fit mx-auto gap-[14px] sm:mx-0 sm:flex sm:flex-row sm:items-center md:items-start sm:gap-4 sm:w-auto">
+          {/* 4. Main CTA button */}
+          <div className="w-fit mx-auto md:mx-0">
             <RiverPebbleButton 
-              href="[LANTERN PAGE URL]"
+              href={FUNDRAISING_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               variant="main"
-            >
-              Share your dream
-            </RiverPebbleButton>
-
-            <RiverPebbleButton 
-              href="[DONATION PAGE URL]"
-              variant="secondary"
+              bgTheme="dark"
             >
               Help build the gallery
             </RiverPebbleButton>
@@ -635,13 +642,13 @@ const ProblemSection = () => {
             }}
           >
             <p>
-              You've watched. You've hoped. Maybe you've donated or spoken out. And still, the headlines keep coming, and it can be hard to know what to do with all that care.
+              You've watched. You've hoped. Maybe you've donated or spoken out. And still, the headlines keep coming. It can be hard to know what to do with all that care.
             </p>
             <p>
               Many of the things we rely on today began with someone imagining a better way. Imagining what could be is often where change begins.
             </p>
             <p>
-              That's why we're building the Imagineerium—a home for dreams of a better world. A place to share what you hope for, see what others dream of, and find the inspiration to act together.
+              That's why we're building the Imagineerium—a home for visions of a better world. A place to share what you hope for and see what others dream of, with the hope that these dreams can inspire action and help bring about real change.
             </p>
             <p>
               You don't need a big idea or a finished plan. A thought, a wish, or a picture is enough to begin.
@@ -659,18 +666,6 @@ const ProblemSection = () => {
           >
             One spark on its own is small. Together, they light the way.
           </p>
-
-          <div className="mt-[24px] flex justify-center sm:block">
-            <RiverPebbleButton
-              href={FUNDRAISING_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              variant="main"
-              bgTheme="light"
-            >
-              Help build the gallery
-            </RiverPebbleButton>
-          </div>
         </FadeIn>
       </div>
     </section>
@@ -2001,7 +1996,7 @@ const HelpGiveDreamsAHomeSection = () => {
     },
     {
       title: "A community that keeps growing",
-      text: "Welcoming people from everywhere to take part, share and be inspired.",
+      text: "A space where people from everywhere can connect over shared dreams, and maybe start something together.",
       icon: Users
     }
   ];
@@ -2063,7 +2058,7 @@ const HelpGiveDreamsAHomeSection = () => {
               Imagine opening a gallery filled with what people everywhere hope for.
             </p>
             <p>
-              That's what we're building: an online gallery where anyone can share a dream for the world and discover what others imagine. Our hope is that it becomes more than a collection: a place where one person's dream can inspire another to act.
+              That's what we're building. More than a collection, a place where one person's dream can inspire another to act.
             </p>
           </div>
         </FadeIn>
