@@ -1519,7 +1519,7 @@ const GallerySection = () => {
               </span>
             </h2>
             <p 
-              className="text-[18px] mb-10 max-w-2xl mx-auto not-italic"
+              className="text-[18px] max-w-2xl mx-auto not-italic"
               style={{
                 fontFamily: '"Plus Jakarta Sans", sans-serif',
                 fontWeight: 400,
@@ -1527,17 +1527,8 @@ const GallerySection = () => {
                 color: '#FBF8F1'
               }}
             >
-              We're building a place where these dreams can live and grow.
+              We're building a place where these dreams and visions can live and grow.
             </p>
-            <div className="inline-block pointer-events-auto">
-              <RiverPebbleButton 
-                href="[LANTERN PAGE URL]"
-                variant="main"
-                bgTheme="dark"
-              >
-                Share your dream
-              </RiverPebbleButton>
-            </div>
           </FadeIn>
         </div>
       </div>
